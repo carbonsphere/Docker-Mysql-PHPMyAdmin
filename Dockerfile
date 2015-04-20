@@ -8,7 +8,10 @@ FROM carbonsphere/docker-centos6-php-nginx
 MAINTAINER CarbonSphere <CarbonSphere@gmail.com>
 
 # Add Environment Variables
-ENV MYSQL_ROOT_PASSWORD      carbon
+ENV MYSQL_USER				carbon
+ENV MYSQL_PASS 				carbon
+ENV MYSQL_DEFAULT_DB		carbon
+ENV MYSQL_ROOT_PASSWORD     carbon
 
 # Install MySQL
 RUN yum -y install mysql-server mysql-client; yum -y clean all
@@ -33,15 +36,16 @@ RUN echo -e "<?php\nheader('Location: /phpMyAdmin/index.php');\n?>" > /var/www/i
 
 # Add create user & db script to root
 ADD createUserDb.sh /
-RUN chmod +x /createUserDb.sh
+ADD createRemoteRoot.sh /
+RUN chmod +x /createUserDb.sh; \
+	chmod +x /createRemoteRoot.sh;
 
 # MySQL:3360
 EXPOSE 3306
-
-# Add Session directory
-RUN mkdir /var/lib/php/session; chmod 777 /var/lib/php/session
+chmod 777 /var/lib/php/session
 
 # Start MySQL
 RUN service mysqld start; \
     sleep 5; \
-    /usr/bin/mysqladmin -u root password ${MYSQL_ROOT_PASSWORD};
+    /usr/bin/mysqladmin -u root password ${MYSQL_ROOT_PASSWORD}; \
+	sh /createRemoteRoot.sh; #Create A Default Remote Account
