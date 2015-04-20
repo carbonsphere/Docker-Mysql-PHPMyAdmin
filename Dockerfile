@@ -36,16 +36,18 @@ RUN echo -e "<?php\nheader('Location: /phpMyAdmin/index.php');\n?>" > /var/www/i
 
 # Add create user & db script to root
 ADD createUserDb.sh /
-ADD createRemoteRoot.sh /
-RUN chmod +x /createUserDb.sh; \
-	chmod +x /createRemoteRoot.sh;
+RUN chmod +x /createUserDb.sh;
 
 # MySQL:3360
 EXPOSE 3306
-chmod 777 /var/lib/php/session
 
 # Start MySQL
 RUN service mysqld start; \
     sleep 5; \
     /usr/bin/mysqladmin -u root password ${MYSQL_ROOT_PASSWORD}; \
-	sh /createRemoteRoot.sh; #Create A Default Remote Account
+    # Move MySQL script to run command in docker file \
+	mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "CREATE USER '${MYSQL_USER}' IDENTIFIED BY '${MYSQL_PASS}'; \
+		REVOKE ALL PRIVILEGES,GRANT OPTION from ${MYSQL_USER}; \
+		GRANT USAGE ON *.* to '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASS}'; \
+		GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_USER}'@'%' WITH GRANT OPTION; \
+		FLUSH PRIVILEGES;"
