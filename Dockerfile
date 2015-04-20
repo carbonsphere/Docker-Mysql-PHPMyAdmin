@@ -14,13 +14,13 @@ ENV MYSQL_ROOT_PASSWORD      carbon
 RUN yum -y install mysql-server mysql-client; yum -y clean all
 
 # Install PHP
-RUN yum -y --enablerepo=remi,remi-php56 install php-cli php-pear php-pdo php-mysqlnd php-pgsql php-gd php-mbstring php-mcrypt php-xml; yum -y clean all
+RUN yum -y --enablerepo=remi,remi-php56 install php php-cli php-pear php-pdo php-mysqlnd php-pgsql php-gd php-mbstring php-mcrypt php-xml; yum -y clean all
 
 # Add EPEL Release
 RUN yum -y install epel-release; yum -y install phpmyadmin; yum -y clean all
 
 # Modify supervisord.conf
-RUN echo -e "\n[program:mysqld] \ncommand=/usr/bin/mysqld_safe\nstartsecs=0\nnumprocs=1 \nautostart=true\nautorestart=true" >> /etc/supervisord.conf
+RUN echo -e "\n[program:mysqld] \ncommand=/usr/bin/mysqld_safe\nstartsecs=0\nnumprocs=1 \nautostart=true\nautorestart=true\n" >> /etc/supervisord.conf
 
 # Modify my.cfg
 RUN echo -e "\nsocket=/var/lib/mysql/mysql.sock" >> /etc/my.cfg
